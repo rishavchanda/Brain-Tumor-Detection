@@ -7,12 +7,12 @@ export const darkTheme = {
     bgDark:"#15171E",
     text:"#F2F3F4",
     textSoft:"#C1C7C9",
-    soft:"#373D3F",
+    soft:"#909190",
     soft2:"#8C979A",
     card: "#1C1E27",
     lightAdd:"99",
     yellow: "#fccf03",
-    green: "#03fc45",
+    green: "#03fc5e",
     pink: "#fc036b"
 
     /*Colors

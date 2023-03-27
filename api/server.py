@@ -12,8 +12,19 @@ import base64
 from typing import List
 from pydantic import BaseModel
 from keras.applications.vgg16 import preprocess_input, decode_predictions
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 model = pickle.load(open("brai_tumor_model.pkl", "rb"))
 
 
@@ -34,7 +45,6 @@ class ImageRequest(BaseModel):
 
 @app.post('/predict')
 async def predict(request: ImageRequest):
-
     predict_img=[]
     for item in request.image:
         # Decode the base64-encoded image
@@ -46,8 +56,9 @@ async def predict(request: ImageRequest):
     #print(image_array.shape)
     prediction = model.predict(np.array(predict_img))
     result = np.argmax(prediction, axis =1)
-
-    print(prediction)
+    #make the probablity frtom prediction
+    print(prediction[:,1])
+    print(result)
 
     # Return the prediction as a JSON response
-    return {'result': result.tolist()}
+    return {'result': prediction[:,1].tolist()}

@@ -5,6 +5,9 @@ import { darkTheme, } from "./utils/themes";
 import styled from 'styled-components';
 import ImageUpload from "./Components/ImageUpload";
 import ImagesCard from "./Components/ImagesCard";
+import Loader from "./Components/Loader/Loader";
+import ResultCard from "./Components/ResultCard";
+import axios from 'axios';
 
 const Body = styled.div`
 display: flex; 
@@ -16,19 +19,55 @@ background-color: ${({ theme }) => theme.bg};
 overflow-y: scroll;
 `;
 
+const Heading = styled.div `
+  font-size: 42px;
+  @media (max-width: 530px) {
+    font-size: 30px
+  }
+  font-weight: 600;
+  color: ${({ theme }) => theme.text};
+  margin: 2% 0px;
+`;
+
 const Container = styled.div`
-width: 600px;
-max-width: 100%;
+  max-width: 100%;
   display: flex; 
+  justify-content: center;
+  flex-direction: row;
+  @media (max-width: 1100px) {
+    flex-direction: column;
+  }
+  gap: 40px;
+  padding: 2% 0% 6% 0%;
+`;
+
+const Centered = styled.div`
+  display: flex;
+  justify-content: center;
   align-items: center;
+  height: 100vh;
+`;
+
+const FlexItem = styled.div`
+  width: 500px;
+  @media (max-width: 530px) {
+    width: 400px
+  }
+  @media (max-width: 430px) {
+    width: 300px
+  }
+  display: flex;
   flex-direction: column;
   gap: 40px;
-  padding: 6% 0% 6% 0%;
+  flex: 1;
 `;
 
 const SelectedImages = styled.div`
   display: grid;
   grid-template-columns: auto auto auto;
+  @media (max-width: 530px) {
+    grid-template-columns: auto auto;
+  }
   justify-content: center;
   gap: 10px;
   align-items: center;
@@ -37,7 +76,6 @@ const SelectedImages = styled.div`
 
 const Button = styled.div`
   min-height: 48px;
-  width: 100%;
   border-radius: 8px;;
   color: ${({ theme }) => theme.soft2};
     font-weight: 600;
@@ -53,29 +91,87 @@ const Button = styled.div`
   padding: 0px 14px;
 `;
 
+const Typo = styled.div`
+  font-size: 24px;
+  font-weight: 600;
+  color: ${({ theme }) => theme.text};
+  
+`;
+
+const ResultWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`;
+
+
+
 function App() {
   const [images, setImages] = useState(null);
-  const [selectedImages, setSelectedImages] = useState([]);
+  const [predictedImage, setPredictedImage] = useState(null);
+  const [predictions, setPredictions] = useState();
+  const [loading, setLoading] = useState(false);
+  const [showPrediction, setShowPrediction] = useState(false);
+
+  const generatePrediction = async() => {
+    setLoading(true);
+    const imageData = []
+    for(let i = 0; i < images.length; i++) {
+      imageData.push(images[i].base64_file)
+    }
+    const data = {image: imageData}
+    const res = await axios.post('http://127.0.0.1:8000/predict', data).catch((err) => {
+      console.log(err);
+    });
+    setPredictedImage(images)
+    setPredictions({image: imageData,result: res.data.result})
+    setShowPrediction(true);
+    setLoading(false);
+  }
+
   return (
     <ThemeProvider theme={darkTheme}>
       <Body>
-        <Container>
-          <ImageUpload images={images} setImages={setImages} />
-          <SelectedImages>
-            {images && images.map((image, index) => {
-              return (
-                <ImagesCard
-                  key={index}
-                  image={image}
-                  selectedImages={selectedImages}
-                  setSelectedImages={setSelectedImages}
-                />
-              );
-            })}
-          </SelectedImages>
-          {images && 
-          <Button>Predict</Button>}
-        </Container>
+        <Heading>Brain Tumor Detector 🧠</Heading>
+        {loading ?
+          <Centered>
+            <Loader />
+          </Centered>
+          :
+          <Container>
+            <FlexItem>
+              <ImageUpload images={images} setImages={setImages} />
+              <SelectedImages>
+                {images && images.map((image, index) => {
+                  return (
+                    <ImagesCard
+                      key={index}
+                      image={image}
+                    />
+                  );
+                })}
+              </SelectedImages>
+              {images &&
+                <Button onClick={() => { generatePrediction() }}>PREDICT</Button>}
+            </FlexItem>
+            {showPrediction &&
+              <FlexItem style={{ gap: '22px' }}>
+                <Typo>Our Predictions</Typo>
+                <ResultWrapper>
+                  {predictedImage.map((image, index) => {
+                    return (
+                      <ResultCard
+                        key={index}
+                        image={image}
+                        prediction={predictions.result[index]}
+                      />
+                    );
+                  })}
+                </ResultWrapper>
+              </FlexItem>
+            }
+          </Container>
+        }
       </Body>
     </ThemeProvider>
   );

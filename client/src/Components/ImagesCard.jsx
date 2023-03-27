@@ -17,9 +17,9 @@ const Container = styled.div`
 `;
 
 const Image = styled.img`
-    width: 180px;
-    height: 180px;
-    object-fit: cover;
+    width: 140px;
+    height: 140px;
+    object-fit: fill;
     border-radius: 12px;
 `;
 

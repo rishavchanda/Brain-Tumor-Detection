@@ -5,7 +5,6 @@ import ReactImageFileToBase64 from "react-file-image-to-base64";
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 
 const Container = styled.div`
-    width: 600px;
     max-width: 100%;
     height: 200px;
     display: flex;
@@ -13,7 +12,7 @@ const Container = styled.div`
     justify-content: center;
     gap: 6px;
     align-items: center;
-    border: 2px dashed  ${({ theme }) => theme.soft};
+    border: 2px dashed  ${({ theme }) => theme.soft+ '70'}};
     border-radius: 12px;
     color: ${({ theme }) => theme.soft};
     padding: 20px;
@@ -37,7 +36,6 @@ const ImageUpload = ({images,setImages}) => {
 
     const handleOnCompleted = files => {
         setImages(files);
-        console.log(images)
     };
 
     const CustomisedButton = ({ triggerInput }) => {
