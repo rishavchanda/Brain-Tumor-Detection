@@ -4,8 +4,12 @@ scikit-learn
 numpy
 matplotlib
 Pillow
-os-sys
 opencv-python
 keras
 tensorflow
-pickle-mixin
+fastapi
+uvicorn
+pybase64
+typing
+pydantic
+fastapi[all]
