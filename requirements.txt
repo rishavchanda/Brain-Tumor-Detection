@@ -6,7 +6,7 @@ scikit-learn
 numpy
 matplotlib
 Pillow
-opencv-python
+opencv-python==4.6.0.66
 keras
 tensorflow
 fastapi
@@ -14,4 +14,3 @@ uvicorn
 pybase64
 typing
 pydantic
-fastapi[all]

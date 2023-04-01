@@ -129,3 +129,4 @@ dmypy.json
 .pyre/
 
 ./Brain_Tumor_Data
+Brain_Tumor_Data/
