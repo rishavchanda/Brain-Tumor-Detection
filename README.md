@@ -32,7 +32,7 @@ pip install -r requirements.txt
 Open a new terminal and type
 
 ```
-uvicorn app:app
+gunicorn app:app
 ```
 
 ## Start the web app
