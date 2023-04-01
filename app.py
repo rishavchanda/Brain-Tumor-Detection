@@ -12,7 +12,7 @@ from pydantic import BaseModel
 from keras.applications.vgg16 import preprocess_input, decode_predictions
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI()
+app = Flask(__name__)
 origins = ["*"]
 
 app.add_middleware(
@@ -60,3 +60,6 @@ async def predict(request: ImageRequest):
 
     # Return the prediction as a JSON response
     return {'result': prediction[:,1].tolist()}
+
+if __name__ == '__main__':
+  app.run(port=5000)
