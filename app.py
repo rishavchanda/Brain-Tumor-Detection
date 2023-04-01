@@ -1,7 +1,7 @@
 #use fast api taking string as parameter from a get function and converting it to image and then to numpy array and then to a dataframe and then to a prediction and then to a json file and then to a string and then to a response
-
-from fastapi import FastAPI
-import uvicorn
+from flask import Flask,json,request
+from tensorflow.keras.models import model_from_json
+from flask_cors import CORS, cross_origin
 import numpy as np
 import pandas as pd
 import cv2
@@ -9,22 +9,18 @@ import pickle
 import base64
 from typing import List
 from pydantic import BaseModel
-from keras.applications.vgg16 import preprocess_input, decode_predictions
-from fastapi.middleware.cors import CORSMiddleware
 
 app = Flask(__name__)
-origins = ["*"]
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-model = pickle.load(open("brai_tumor_model.pkl", "rb"))
-
+#model = pickle.load(open("brain_tumor_model.pkl", "rb"))
+json_file = open('model.json', 'r')
+loaded_model_json = json_file.read()
+json_file.close()
+loaded_model = model_from_json(loaded_model_json)
+# load weights into new model
+loaded_model.load_weights("model.h5")
 
 def get_cv2_image_from_base64_string(b64str):
     encoded_data = b64str.split(',')[1]
@@ -33,33 +29,25 @@ def get_cv2_image_from_base64_string(b64str):
     return img
 
 
-@app.get("/")
+@app.route("/",methods=['POST'])
 def read_root():
-    return {"Hello": "World"}
-
-class ImageRequest(BaseModel):
-    image: List[str]
-
-
-@app.post('/predict')
-async def predict(request: ImageRequest):
+    data = json.loads(request.data)
     predict_img=[]
-    for item in request.image:
+    for item in data['image']:
         # Decode the base64-encoded image
         image = get_cv2_image_from_base64_string(item)
         image = cv2.resize(image,(224,224))
         predict_img.append(image)
-    # # Convert the image to a numpy array
-    #image_array = np.array(image)
-    #print(image_array.shape)
-    prediction = model.predict(np.array(predict_img))
-    result = np.argmax(prediction, axis =1)
-    #make the probablity frtom prediction
-    print(prediction[:,1])
-    print(result)
 
-    # Return the prediction as a JSON response
-    return {'result': prediction[:,1].tolist()}
+    # # Convert the image to a numpy array
+    prediction = loaded_model.predict(np.array(predict_img))
+    result = np.argmax(prediction, axis =1)
+
+    #make the probablity frtom prediction
+    # print(prediction[:,1])
+    # print(result)
+
+    return {"result": prediction[:,1].tolist()}
 
 if __name__ == '__main__':
   app.run(port=5000)
