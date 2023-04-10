@@ -39,6 +39,9 @@ def get_image_from_base64_string(b64str):
     img = Image.open(image_data)
     return img
 
+@app.route('/home',methods=['GET'])
+def home():
+    return "Hello World"
 
 @app.route("/", methods=['POST'])
 def read_root():
