@@ -45,24 +45,29 @@ def read_root():
     data = json.loads(request.data)
     predict_img = []
     for item in data['image']:
-        encoded_data = item.split(',')[1]
-        image_data = BytesIO(base64.b64decode(encoded_data))
-        pil_image = Image.open(image_data)
-        # Resizing the image to 224x224
-        resized_image = pil_image.resize((224, 224))
-        # Appending the resized image to the list
-        predict_img.append(resized_image)
+        #Decode the base64-encoded image
+        image = get_cv2_image_from_base64_string(item)
+        image = cv2.resize(image,(224,224))
+        predict_img.append(image)
+        # encoded_data = item.split(',')[1]
+        # image_data = BytesIO(base64.b64decode(encoded_data))
+        # pil_image = Image.open(image_data)
+        # # Resize the image to 224x224
+        # resized_image = pil_image.resize((224, 224))
+        # # Append the resized image to the list
+        # predict_img.append(resized_image)
 
-    np_images = np.array([np.array(img) for img in predict_img])
-    # Converting the NumPy array to a TensorFlow tensor
-    tf_images = tf.convert_to_tensor(np_images, dtype=tf.float32)
-    # # Converting the image to a numpy array
-    prediction = loaded_model.predict(tf_images)
+    # np_images = np.array([np.array(img) for img in predict_img])
+    # # Convert the NumPy array to a TensorFlow tensor
+    # tf_images = tf.convert_to_tensor(np_images, dtype=tf.float32)
+    # # # Convert the image to a numpy array
+    prediction = loaded_model.predict(np.array(predict_img))
     result = np.argmax(prediction, axis=1)
 
     # make the probablity frtom prediction
     # print(prediction[:,1])
     # print(result)
+
     return {"result": prediction[:, 1].tolist()}
 
 
