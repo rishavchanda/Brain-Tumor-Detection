@@ -63,7 +63,6 @@ def read_root():
     # make the probablity frtom prediction
     # print(prediction[:,1])
     # print(result)
-
     return {"result": prediction[:, 1].tolist()}
 
 
