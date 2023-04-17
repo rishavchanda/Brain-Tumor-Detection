@@ -8,6 +8,8 @@ import ImagesCard from "./Components/ImagesCard";
 import Loader from "./Components/Loader/Loader";
 import ResultCard from "./Components/ResultCard";
 import axios from 'axios';
+import { Images } from "./data";
+import { useEffect } from "react";
 
 const Body = styled.div`
 display: flex; 
@@ -19,7 +21,7 @@ background-color: ${({ theme }) => theme.bg};
 overflow-y: scroll;
 `;
 
-const Heading = styled.div `
+const Heading = styled.div`
   font-size: 42px;
   @media (max-width: 530px) {
     font-size: 30px
@@ -61,6 +63,14 @@ const FlexItem = styled.div`
   gap: 40px;
   flex: 1;
 `;
+
+const TextCenter = styled.div`
+  font-size: 22px;
+  font-weight: 600;
+  color: ${({ theme }) => theme.text};
+  text-align: center;
+`;
+
 
 const SelectedImages = styled.div`
   display: grid;
@@ -113,21 +123,38 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [showPrediction, setShowPrediction] = useState(false);
 
-  const generatePrediction = async() => {
+  const generatePrediction = async () => {
     setLoading(true);
     const imageData = []
-    for(let i = 0; i < images.length; i++) {
+    for (let i = 0; i < images.length; i++) {
       imageData.push(images[i].base64_file)
     }
-    const data = {image: imageData}
+    const data = { image: imageData }
     const res = await axios.post('https://brain-tumor-detection-production.up.railway.app/', data).catch((err) => {
       console.log(err);
     });
     setPredictedImage(images)
-    setPredictions({image: imageData,result: res.data.result})
+    setPredictions({ image: imageData, result: res.data.result })
     setShowPrediction(true);
     setLoading(false);
   }
+
+  const generateNewImages = () => {
+    const newImages = [];
+    //get 6 random images from the data
+    for (let i = 0; i < 3; i++) {
+      const randomIndex = Math.floor(Math.random() * Images.length);
+      newImages.push({
+        base64_file: Images[randomIndex],
+        file_name: `Sample ${i + 1}`,
+      });
+    }
+    setImages(newImages);
+  };
+
+  useEffect(() => {
+    generateNewImages();
+  }, []);
 
   return (
     <ThemeProvider theme={darkTheme}>
@@ -141,6 +168,7 @@ function App() {
           <Container>
             <FlexItem>
               <ImageUpload images={images} setImages={setImages} />
+              <TextCenter>Or try with sample data</TextCenter>
               <SelectedImages>
                 {images && images.map((image, index) => {
                   return (
@@ -151,6 +179,7 @@ function App() {
                   );
                 })}
               </SelectedImages>
+              <Button onClick={() => generateNewImages()}>Get Sample Images</Button>
               {images &&
                 <Button onClick={() => { generatePrediction() }}>PREDICT</Button>}
             </FlexItem>
